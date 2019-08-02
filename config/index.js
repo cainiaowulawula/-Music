@@ -10,7 +10,13 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/a':{                                // 要代理的接口名
+      target:'http://localhost:3000/v1/personalized',   // 要代理的接口地址
+        changeOrigin:true,                            // 允许跨域
+        pathRewrite:{'^/a':''}            // 接口名重写
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST

@@ -1,6 +1,7 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
+    <van-button type="primary">默认按钮</van-button>
     <h2>Essential Links</h2>
     <ul>
       <li>
