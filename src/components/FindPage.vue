@@ -48,8 +48,49 @@
                 <van-button plain  size="small" style="color:black;border-color:#e8eaec;border-radius:50px" ><span>歌单广场</span></van-button>
             </div>
             <div class="findbodycard">
-                <div :style="'height:'+screenWidth+'px'" v-for="(card,index) in 6" :key="index" class="card">
-                
+                <div :style="'height:'+screenWidth+'px'" v-for="(card,index) in datalist" :key="index" class="card">
+                    <img
+                        class="cardImg"
+                        width="100%"
+                        :src="card.picUrl"
+                    />
+                    <p>{{card.name}}</p>
+                </div>
+            </div>
+        </div>
+        <div  class="findbody">
+            <div class="findtitle">
+                <div v-show="status">
+                    <label  class="findtitlename">新碟</label>
+                    <label class="titletwo">|</label>
+                    <label @click="newDisc" class="findtitletwo">新歌</label>
+                </div>
+                <div v-show="!status">
+                    <label @click="newDisc" class="findtitletwo">新碟</label>
+                    <label class="titletwo">|</label>
+                    <label class="findtitlename">新歌</label>
+                </div>
+                <van-button v-show="status" plain  size="small" style="color:black;border-color:#e8eaec;border-radius:50px" ><span>更多新碟</span></van-button>
+                <van-button v-show="!status" plain  size="small" style="color:black;border-color:#e8eaec;border-radius:50px" ><span>推荐新歌</span></van-button>
+            </div>
+            <div v-show="status" class="findbodycard">
+                <div :style="'height:'+screenWidth+'px'" v-for="(card,index) in discListThree" :key="index" class="card">
+                    <img
+                        class="cardImg"
+                        width="100%"
+                        :src="card.picUrl"
+                    />
+                    <p>{{card.name}}</p>
+                </div>
+            </div>
+            <div v-show="!status" class="findbodycard">
+                <div :style="'height:'+screenWidth+'px'" v-for="(card,index) in songListThree" :key="index" class="card">
+                    <img
+                        class="cardImg"
+                        width="100%"
+                        :src="card.album.picUrl"
+                    />
+                    <p>{{card.album.name}}</p>
                 </div>
             </div>
         </div>
@@ -61,35 +102,73 @@ import axios from 'axios'
 export default {
     data(){
         return{
+            status: true,
             images: [
                 'https://p1.music.126.net/J7GkNCPr5ro6v-cFMFPoGg==/109951164259290772.jpg',
                 'https://p1.music.126.net/csNfhmB5B-ce22eTUwLTUg==/109951164258219899.jpg',
                 'https://p1.music.126.net/YUXGoDab5klimOkcNgHBoA==/109951164259280309.jpg',
                 'https://p1.music.126.net/836iP64Wd0pVstrsTjYsqQ==/109951164259305108.jpg'
             ],
-            screenWidth: ''
+            screenWidth: '',
+            datalist: [],
+            discList: [],
+            discListThree: [],
+            songList: [],
+            songListThree: [],
+        }
+    },
+    methods:{
+        getDate(){
+            axios.get('/personalized').then( (response)=>{
+                this.datalist = response.data.result;
+            })
+            axios.get('/top/album').then((response)=>{
+                this.discList = response.data.albums;
+                for(var i = 0 ; i< 3 ; i++){
+                    this.discListThree[i] = this.discList[i];
+                }
+            })
+            axios.get('/top/songs').then((response)=>{
+                console.log(response.data.data);
+                this.songList = response.data.data;
+                for(var i = 0 ; i< 3 ; i++){
+                    this.songListThree[i] = this.songList[i];
+                }
+                console.log(this.songListThree);
+            })
+        },
+        newDisc(){
+            this.status = !this.status;
         }
     },
     mounted(){
         window.onresize = () => {
             return (() => {
-                this.screenWidth = (document.body.clientWidth-30)*0.9/3;
-                console.log("mounted:"+(document.body.clientWidth-30)*0.9/3);
+                this.screenWidth = (document.body.clientWidth+60)/3;
+                console.log("mounted:"+(document.body.clientWidth)/3);
             })();
         };
+        this.getDate();
     },
     created(){
-        console.log("created:"+(document.body.clientWidth-30)*0.9/3);
-        this.screenWidth = (document.body.clientWidth-30)*0.9/3;
-        axios.get('/a')
-        .then(function (response) {
-            console.log(response);
-        })
-
+        console.log("created:"+(document.body.clientWidth)/3);
+        this.screenWidth = (document.body.clientWidth+60)/3;
+        this.getDate();
     }
 }
 </script>
 <style scoped>
+.card p{
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.cardImg{
+    border-radius:5px
+}
 .findtitle{
     display: flex;
     justify-content: space-between;
@@ -107,11 +186,18 @@ export default {
 }
 .card{
     width: 30%;
-    border: 1px solid black;
+    margin-bottom:20px
+}
+.titletwo{
+    color: #e8eaec
 }
 .findtitlename{
     font-size: 16px;
     font-weight: 600
+}
+.findtitletwo{
+    color: grey;
+    font-size: 14px
 }
 .carousel{
     height: 280px;
